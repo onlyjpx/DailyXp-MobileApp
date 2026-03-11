@@ -33,7 +33,7 @@ fun HomeScreen(
 
     Scaffold(
         containerColor = BgDark,
-        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}, onAgenda = onAgenda) }
+        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}, onAgenda = onAgenda, currentScreen = "home") }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -161,14 +161,15 @@ fun BottomNavBar(
     onAddHabit: () -> Unit = {},
     onStats: () -> Unit = {},
     onHome: () -> Unit = {},
-    onAgenda: () -> Unit
+    onAgenda: () -> Unit,
+    currentScreen: String = "home"
 ) {
     NavigationBar(
         containerColor = Surface,
         tonalElevation = 0.dp
     ) {
         NavigationBarItem(
-            selected = true,
+            selected = currentScreen == "home",
             onClick = onHome,
             icon = { Icon(Icons.Filled.Home, contentDescription = "Início") },
             label = { Text("Início") },
@@ -181,7 +182,7 @@ fun BottomNavBar(
             )
         )
         NavigationBarItem(
-            selected = false,
+            selected = currentScreen == "agenda",
             onClick = onAgenda,
             icon = { Icon(Icons.Filled.DateRange, contentDescription = "Agenda") },
             label = { Text("Agenda") },
@@ -211,7 +212,7 @@ fun BottomNavBar(
             colors = NavigationBarItemDefaults.colors(indicatorColor = Surface)
         )
         NavigationBarItem(
-            selected = false,
+            selected = currentScreen == "stats",
             onClick = onStats,
             icon = { Icon(Icons.Filled.Star, contentDescription = "Stats") },
             label = { Text("Stats") },
@@ -224,7 +225,7 @@ fun BottomNavBar(
             )
         )
         NavigationBarItem(
-            selected = false,
+            selected = currentScreen == "perfil",
             onClick = {},
             icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
             label = { Text("Perfil") },

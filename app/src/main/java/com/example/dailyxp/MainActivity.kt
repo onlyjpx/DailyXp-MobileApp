@@ -40,6 +40,7 @@ class MainActivity : ComponentActivity() {
                         onBack = { currentScreen = "home" }
                     )
                     "stats" -> StatsScreen(
+                        viewModel = viewModel,
                         onBack = { currentScreen = "home" },
                         onAddHabit = { currentScreen = "create" },
                         onHome = { currentScreen = "home" },

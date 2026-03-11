@@ -58,7 +58,8 @@ fun AgendaScreen(
                 onAddHabit = onAddHabit,
                 onStats = onStats,
                 onHome = onHome,
-                onAgenda = {}
+                onAgenda = {},
+                currentScreen = "agenda"
             )
         }
     ) { innerPadding ->
