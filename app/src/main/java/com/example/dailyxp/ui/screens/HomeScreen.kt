@@ -23,7 +23,8 @@ import com.example.dailyxp.viewmodel.HabitViewModel
 fun HomeScreen(
     viewModel: HabitViewModel,
     onAddHabit: () -> Unit = {},
-    onStats: () -> Unit = {}
+    onStats: () -> Unit = {},
+    onAgenda: () -> Unit = {}
 ) {
     val habits by viewModel.allHabits.collectAsState()
 
@@ -32,7 +33,7 @@ fun HomeScreen(
 
     Scaffold(
         containerColor = BgDark,
-        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}) }
+        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}, onAgenda = onAgenda) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -159,7 +160,8 @@ fun HomeScreen(
 fun BottomNavBar(
     onAddHabit: () -> Unit = {},
     onStats: () -> Unit = {},
-    onHome: () -> Unit = {}
+    onHome: () -> Unit = {},
+    onAgenda: () -> Unit
 ) {
     NavigationBar(
         containerColor = Surface,
@@ -180,7 +182,7 @@ fun BottomNavBar(
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onAgenda,
             icon = { Icon(Icons.Filled.DateRange, contentDescription = "Agenda") },
             label = { Text("Agenda") },
             colors = NavigationBarItemDefaults.colors(

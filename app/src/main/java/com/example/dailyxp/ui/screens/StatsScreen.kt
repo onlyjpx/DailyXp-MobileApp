@@ -18,7 +18,8 @@ import com.example.dailyxp.ui.theme.*
 fun StatsScreen(
     onBack: () -> Unit = {},
     onAddHabit: () -> Unit = {},
-    onHome: () -> Unit = {}
+    onHome: () -> Unit = {},
+    onAgenda: () -> Unit = {}
 ) {
     Scaffold(
         containerColor = BgDark,
@@ -26,7 +27,8 @@ fun StatsScreen(
             BottomNavBar(
                 onAddHabit = onAddHabit,
                 onStats = {},
-                onHome = onBack
+                onHome = onHome,
+                onAgenda = onAgenda
             )
         }
     ) { innerPadding ->

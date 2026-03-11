@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.compose.runtime.*
+import com.example.dailyxp.ui.screens.AgendaScreen
 import com.example.dailyxp.ui.screens.CreateHabitScreen
 import com.example.dailyxp.ui.screens.HomeScreen
 import com.example.dailyxp.ui.screens.StatsScreen
@@ -25,6 +26,13 @@ class MainActivity : ComponentActivity() {
                     "home" -> HomeScreen(
                         viewModel = viewModel,
                         onAddHabit = { currentScreen = "create" },
+                        onStats = { currentScreen = "stats" },
+                        onAgenda = { currentScreen = "agenda" }
+                    )
+                    "agenda" -> AgendaScreen(
+                        viewModel = viewModel,
+                        onAddHabit = { currentScreen = "create" },
+                        onHome = { currentScreen = "home" },
                         onStats = { currentScreen = "stats" }
                     )
                     "create" -> CreateHabitScreen(
@@ -34,7 +42,8 @@ class MainActivity : ComponentActivity() {
                     "stats" -> StatsScreen(
                         onBack = { currentScreen = "home" },
                         onAddHabit = { currentScreen = "create" },
-                        onHome = { currentScreen = "home" }
+                        onHome = { currentScreen = "home" },
+                        onAgenda = { currentScreen = "agenda" }
                     )
                 }
             }
