@@ -128,6 +128,7 @@ fun HomeScreen(
                 }
             }
 
+// oi joaoo, editar aquiii ->>
             items(habits, key = { it.id }) { habit ->
                 val isDone = viewModel.isCompletedToday(habit.ultimaVezCompletado)
                 HabitItem(
@@ -142,7 +143,9 @@ fun HomeScreen(
                         } else {
                             viewModel.completeHabit(habit)
                         }
-                    }
+                    },
+                    onEdit = { /* por enquanto vazio, João Pedro vai conectar */ },
+                    onDelete = { viewModel.deleteHabit(habit) }
                 )
                 HorizontalDivider(color = Surface2, thickness = 1.dp)
             }
