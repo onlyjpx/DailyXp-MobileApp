@@ -16,11 +16,19 @@ import com.example.dailyxp.ui.theme.*
 
 @Composable
 fun StatsScreen(
-    onBack: () -> Unit = {}
+    onBack: () -> Unit = {},
+    onAddHabit: () -> Unit = {},
+    onHome: () -> Unit = {}
 ) {
     Scaffold(
         containerColor = BgDark,
-        bottomBar = { BottomNavBar(onAddHabit = {}) }
+        bottomBar = {
+            BottomNavBar(
+                onAddHabit = onAddHabit,
+                onStats = {},
+                onHome = onBack
+            )
+        }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier

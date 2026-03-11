@@ -14,14 +14,68 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dailyxp.ui.theme.*
+import com.example.dailyxp.viewmodel.HabitViewModel
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CreateHabitScreen(
+    viewModel: HabitViewModel,
     onBack: () -> Unit = {}
 ) {
     var habitName by remember { mutableStateOf("") }
-    var habitTime by remember { mutableStateOf("") }
     var habitSubtitle by remember { mutableStateOf("") }
+    var xpValue by remember { mutableStateOf("10") }
+    var showTimePicker by remember { mutableStateOf(false) }
+    var selectedHour by remember { mutableStateOf(7) }
+    var selectedMinute by remember { mutableStateOf(0) }
+    val timePickerState = rememberTimePickerState(
+        initialHour = selectedHour,
+        initialMinute = selectedMinute,
+        is24Hour = true
+    )
+
+    val formattedTime = String.format("%02d:%02d", selectedHour, selectedMinute)
+
+    if (showTimePicker) {
+        AlertDialog(
+            onDismissRequest = { showTimePicker = false },
+            containerColor = Surface,
+            title = {
+                Text("Selecionar horário", color = TextPrimary, fontWeight = FontWeight.Bold)
+            },
+            text = {
+                TimePicker(
+                    state = timePickerState,
+                    colors = TimePickerDefaults.colors(
+                        clockDialColor = Surface2,
+                        selectorColor = Teal,
+                        containerColor = Surface,
+                        periodSelectorBorderColor = Teal,
+                        clockDialSelectedContentColor = BgDark,
+                        clockDialUnselectedContentColor = TextPrimary,
+                        timeSelectorSelectedContainerColor = Teal,
+                        timeSelectorUnselectedContainerColor = Surface2,
+                        timeSelectorSelectedContentColor = BgDark,
+                        timeSelectorUnselectedContentColor = TextPrimary,
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    selectedHour = timePickerState.hour
+                    selectedMinute = timePickerState.minute
+                    showTimePicker = false
+                }) {
+                    Text("Confirmar", color = Teal, fontWeight = FontWeight.Bold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showTimePicker = false }) {
+                    Text("Cancelar", color = TextMuted)
+                }
+            }
+        )
+    }
 
     Scaffold(
         containerColor = BgDark,
@@ -33,11 +87,7 @@ fun CreateHabitScreen(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onBack) {
-                    Icon(
-                        Icons.Filled.ArrowBack,
-                        contentDescription = "Voltar",
-                        tint = TextPrimary
-                    )
+                    Icon(Icons.Filled.ArrowBack, contentDescription = "Voltar", tint = TextPrimary)
                 }
                 Text(
                     text = "Novo Hábito",
@@ -57,7 +107,6 @@ fun CreateHabitScreen(
         ) {
             Spacer(modifier = Modifier.height(8.dp))
 
-            // ── Nome do hábito ──
             Text(text = "Nome do hábito", fontSize = 13.sp, color = TextMuted)
             OutlinedTextField(
                 value = habitName,
@@ -74,12 +123,12 @@ fun CreateHabitScreen(
                 )
             )
 
-            // ── Horário ──
             Text(text = "Horário", fontSize = 13.sp, color = TextMuted)
             OutlinedTextField(
-                value = habitTime,
-                onValueChange = { habitTime = it },
-                placeholder = { Text("Ex: 07:00", color = TextDim) },
+                value = formattedTime,
+                onValueChange = {},
+                readOnly = true,
+                placeholder = { Text("Toque para selecionar", color = TextDim) },
                 modifier = Modifier.fillMaxWidth(),
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -88,10 +137,14 @@ fun CreateHabitScreen(
                     focusedTextColor = TextPrimary,
                     unfocusedTextColor = TextPrimary,
                     cursorColor = Teal
-                )
+                ),
+                trailingIcon = {
+                    TextButton(onClick = { showTimePicker = true }) {
+                        Text("Alterar", color = Teal, fontSize = 12.sp)
+                    }
+                }
             )
 
-            // ── Descrição ──
             Text(text = "Descrição", fontSize = 13.sp, color = TextMuted)
             OutlinedTextField(
                 value = habitSubtitle,
@@ -108,11 +161,39 @@ fun CreateHabitScreen(
                 )
             )
 
+            Text(text = "XP do hábito", fontSize = 13.sp, color = TextMuted)
+            OutlinedTextField(
+                value = xpValue,
+                onValueChange = { xpValue = it },
+                placeholder = { Text("Ex: 10", color = TextDim) },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = Teal,
+                    unfocusedBorderColor = Surface2,
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
+                    cursorColor = Teal
+                )
+            )
+
             Spacer(modifier = Modifier.weight(1f))
 
-            // ── Botão Salvar ──
             Button(
-                onClick = { onBack() },
+                onClick = {
+                    if (habitName.isNotBlank()) {
+                        val descricao = buildString {
+                            append(formattedTime)
+                            if (habitSubtitle.isNotBlank()) append(" · $habitSubtitle")
+                        }
+                        viewModel.insertHabit(
+                            titulo = habitName,
+                            descricao = descricao,
+                            xp = xpValue.toIntOrNull() ?: 10
+                        )
+                        onBack()
+                    }
+                },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(52.dp),

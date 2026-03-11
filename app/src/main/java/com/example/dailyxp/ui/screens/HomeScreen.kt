@@ -17,28 +17,22 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.dailyxp.ui.components.HabitItem
 import com.example.dailyxp.ui.theme.*
-
-data class Habit(
-    val time: String,
-    val name: String,
-    val subtitle: String,
-    val xp: Int,
-    val isDone: Boolean = false
-)
-
-val sampleHabits = listOf(
-    Habit("7:00",  "Acordar e arrumar a cama", "Manhã · 5 min",  5,  true),
-    Habit("10:30", "Fazer o almoço",           "Manhã · 30 min", 10, true),
-    Habit("15:00", "Passear com o cachorro",   "Tarde · 20 min", 8,  false),
-    Habit("17:00", "Molhar as plantas",        "Tarde · 5 min",  5,  false),
-    Habit("20:00", "Ir para a academia",       "Noite · 60 min", 20, false),
-)
+import com.example.dailyxp.viewmodel.HabitViewModel
 
 @Composable
-fun HomeScreen(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
+fun HomeScreen(
+    viewModel: HabitViewModel,
+    onAddHabit: () -> Unit = {},
+    onStats: () -> Unit = {}
+) {
+    val habits by viewModel.allHabits.collectAsState()
+
+    val totalXP = habits.sumOf { it.xp }
+    val maxStreak = habits.maxOfOrNull { it.streak } ?: 0
+
     Scaffold(
         containerColor = BgDark,
-        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats) }
+        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -82,16 +76,16 @@ fun HomeScreen(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    StatChip(icon = "⚡", value = "7424 XP", label = "Experiência", modifier = Modifier.weight(1f))
-                    StatChip(icon = "🔥", value = "12 dias", label = "Sequência", modifier = Modifier.weight(1f))
+                    StatChip(icon = "⚡", value = "$totalXP XP", label = "Experiência", modifier = Modifier.weight(1f))
+                    StatChip(icon = "🔥", value = "$maxStreak dias", label = "Sequência", modifier = Modifier.weight(1f))
                 }
 
                 Spacer(modifier = Modifier.height(24.dp))
 
                 // ── Barra de progresso ──
-                val done = sampleHabits.count { it.isDone }
-                val total = sampleHabits.size
-                val pct = done.toFloat() / total
+                val done = habits.count { viewModel.isCompletedToday(it.ultimaVezCompletado) }
+                val total = habits.size
+                val pct = if (total > 0) done.toFloat() / total else 0f
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -115,20 +109,40 @@ fun HomeScreen(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
 
                 Spacer(modifier = Modifier.height(20.dp))
 
-                // ── Label Hoje ──
-                Text(text = "HOJE", fontSize = 11.sp, fontWeight = FontWeight.Medium, color = TextMuted, letterSpacing = 1.sp)
+                Text(
+                    text = "HOJE",
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    color = TextMuted,
+                    letterSpacing = 1.sp
+                )
 
                 Spacer(modifier = Modifier.height(8.dp))
+
+                if (habits.isEmpty()) {
+                    Text(
+                        text = "Nenhum hábito ainda. Clique em + para adicionar!",
+                        color = TextMuted,
+                        fontSize = 14.sp
+                    )
+                }
             }
 
-            // ── Lista de hábitos ──
-            items(sampleHabits) { habit ->
+            items(habits, key = { it.id }) { habit ->
+                val isDone = viewModel.isCompletedToday(habit.ultimaVezCompletado)
                 HabitItem(
-                    time = habit.time,
-                    name = habit.name,
-                    subtitle = habit.subtitle,
+                    time = habit.descricao?.substringBefore(" ·") ?: "",
+                    name = habit.titulo,
+                    subtitle = habit.descricao ?: "",
                     xp = habit.xp,
-                    isDone = habit.isDone
+                    isDone = isDone,
+                    onComplete = {
+                        if (isDone) {
+                            viewModel.uncompleteHabit(habit)
+                        } else {
+                            viewModel.completeHabit(habit)
+                        }
+                    }
                 )
                 HorizontalDivider(color = Surface2, thickness = 1.dp)
             }
@@ -139,14 +153,18 @@ fun HomeScreen(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
 }
 
 @Composable
-fun BottomNavBar(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
+fun BottomNavBar(
+    onAddHabit: () -> Unit = {},
+    onStats: () -> Unit = {},
+    onHome: () -> Unit = {}
+) {
     NavigationBar(
         containerColor = Surface,
         tonalElevation = 0.dp
     ) {
         NavigationBarItem(
             selected = true,
-            onClick = {},
+            onClick = onHome,
             icon = { Icon(Icons.Filled.Home, contentDescription = "Início") },
             label = { Text("Início") },
             colors = NavigationBarItemDefaults.colors(
