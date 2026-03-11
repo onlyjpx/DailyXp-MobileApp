@@ -35,10 +35,10 @@ val sampleHabits = listOf(
 )
 
 @Composable
-fun HomeScreen() {
+fun HomeScreen(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
     Scaffold(
         containerColor = BgDark,
-        bottomBar = { BottomNavBar() }
+        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats) }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -139,7 +139,7 @@ fun HomeScreen() {
 }
 
 @Composable
-fun BottomNavBar() {
+fun BottomNavBar(onAddHabit: () -> Unit = {}, onStats: () -> Unit = {}) {
     NavigationBar(
         containerColor = Surface,
         tonalElevation = 0.dp
@@ -172,7 +172,7 @@ fun BottomNavBar() {
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onAddHabit,
             icon = {
                 Box(
                     modifier = Modifier
@@ -189,7 +189,7 @@ fun BottomNavBar() {
         )
         NavigationBarItem(
             selected = false,
-            onClick = {},
+            onClick = onStats,
             icon = { Icon(Icons.Filled.Star, contentDescription = "Stats") },
             label = { Text("Stats") },
             colors = NavigationBarItemDefaults.colors(
