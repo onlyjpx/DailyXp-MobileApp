@@ -1,13 +1,16 @@
 package com.example.dailyxp.viewmodel
 
 import android.app.Application
+import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.dailyxp.data.local.AppDatabase
 import com.example.dailyxp.data.local.HabitEntity
 import com.example.dailyxp.data.repository.HabitRepository
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
@@ -23,14 +26,24 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         initialValue = emptyList()
     )
 
+    // ── Perfil do usuário (SharedPreferences) ─────────────────────
+    private val prefs = application.getSharedPreferences("user_prefs", Context.MODE_PRIVATE)
+
+    private val _userName = MutableStateFlow(
+        prefs.getString("user_name", "Explorador") ?: "Explorador"
+    )
+    val userName: StateFlow<String> = _userName.asStateFlow()
+
+    fun updateUserName(name: String) {
+        _userName.value = name
+        prefs.edit().putString("user_name", name).apply()
+    }
+
+    // ── Hábitos ───────────────────────────────────────────────────
     fun insertHabit(titulo: String, descricao: String, xp: Int) {
         viewModelScope.launch {
             repository.insert(
-                HabitEntity(
-                    titulo = titulo,
-                    descricao = descricao,
-                    xp = xp
-                )
+                HabitEntity(titulo = titulo, descricao = descricao, xp = xp)
             )
         }
     }

@@ -41,7 +41,8 @@ fun StatsScreen(
     onBack: () -> Unit = {},
     onAddHabit: () -> Unit = {},
     onHome: () -> Unit = {},
-    onAgenda: () -> Unit = {}
+    onAgenda: () -> Unit = {},
+    onProfile: () -> Unit = {}
 ) {
     val habits by viewModel.allHabits.collectAsState()
     val totalXP = habits.sumOf { it.xp }
@@ -70,6 +71,7 @@ fun StatsScreen(
                 onStats = {},
                 onHome = onHome,
                 onAgenda = onAgenda,
+                onProfile = onProfile,
                 currentScreen = "stats"
             )
         }

@@ -30,7 +30,8 @@ fun AgendaScreen(
     onAddHabit: () -> Unit = {},
     onHome: () -> Unit = {},
     onStats: () -> Unit = {},
-    onEditHabit: (HabitEntity) -> Unit = {}
+    onEditHabit: (HabitEntity) -> Unit = {},
+    onProfile: () -> Unit = {}
 ) {
     val habits by viewModel.allHabits.collectAsState()
 
@@ -65,6 +66,7 @@ fun AgendaScreen(
                 onStats = onStats,
                 onHome = onHome,
                 onAgenda = {},
+                onProfile = onProfile,
                 currentScreen = "agenda"
             )
         }

@@ -10,6 +10,7 @@ import com.example.dailyxp.data.local.HabitEntity
 import com.example.dailyxp.ui.screens.AgendaScreen
 import com.example.dailyxp.ui.screens.HabitFormScreen
 import com.example.dailyxp.ui.screens.HomeScreen
+import com.example.dailyxp.ui.screens.ProfileScreen
 import com.example.dailyxp.ui.screens.StatsScreen
 import com.example.dailyxp.ui.theme.DailyXpTheme
 import com.example.dailyxp.viewmodel.HabitViewModel
@@ -30,6 +31,7 @@ class MainActivity : ComponentActivity() {
                         onAddHabit = { currentScreen = "create" },
                         onStats = { currentScreen = "stats" },
                         onAgenda = { currentScreen = "agenda" },
+                        onProfile = { currentScreen = "perfil" },
                         onEditHabit = { habit ->
                             habitToEdit = habit
                             currentScreen = "edit"
@@ -40,6 +42,7 @@ class MainActivity : ComponentActivity() {
                         onAddHabit = { currentScreen = "create" },
                         onHome = { currentScreen = "home" },
                         onStats = { currentScreen = "stats" },
+                        onProfile = { currentScreen = "perfil" },
                         onEditHabit = { habit ->
                             habitToEdit = habit
                             currentScreen = "edit"
@@ -61,7 +64,15 @@ class MainActivity : ComponentActivity() {
                         onBack = { currentScreen = "home" },
                         onAddHabit = { currentScreen = "create" },
                         onHome = { currentScreen = "home" },
-                        onAgenda = { currentScreen = "agenda" }
+                        onAgenda = { currentScreen = "agenda" },
+                        onProfile = { currentScreen = "perfil" }
+                    )
+                    "perfil" -> ProfileScreen(
+                        viewModel = viewModel,
+                        onHome = { currentScreen = "home" },
+                        onStats = { currentScreen = "stats" },
+                        onAgenda = { currentScreen = "agenda" },
+                        onAddHabit = { currentScreen = "create" }
                     )
                 }
             }

@@ -26,16 +26,18 @@ fun HomeScreen(
     onAddHabit: () -> Unit = {},
     onStats: () -> Unit = {},
     onAgenda: () -> Unit = {},
-    onEditHabit: (HabitEntity) -> Unit = {}
+    onEditHabit: (HabitEntity) -> Unit = {},
+    onProfile: () -> Unit = {}
 ) {
     val habits by viewModel.allHabits.collectAsState()
+    val userName by viewModel.userName.collectAsState()
 
     val totalXP = habits.sumOf { it.xp }
     val maxStreak = habits.maxOfOrNull { it.streak } ?: 0
 
     Scaffold(
         containerColor = BgDark,
-        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}, onAgenda = onAgenda, currentScreen = "home") }
+        bottomBar = { BottomNavBar(onAddHabit = onAddHabit, onStats = onStats, onHome = {}, onAgenda = onAgenda, onProfile = onProfile, currentScreen = "home") }
     ) { innerPadding ->
         LazyColumn(
             modifier = Modifier
@@ -55,7 +57,7 @@ fun HomeScreen(
                     Column {
                         Text(text = "Bom dia,", fontSize = 13.sp, color = TextMuted)
                         Text(
-                            text = "Maria Eduarda",
+                            text = userName.ifBlank { "Explorador" },
                             fontSize = 22.sp,
                             fontWeight = FontWeight.Bold,
                             color = TextPrimary
@@ -164,6 +166,7 @@ fun BottomNavBar(
     onStats: () -> Unit = {},
     onHome: () -> Unit = {},
     onAgenda: () -> Unit,
+    onProfile: () -> Unit = {},
     currentScreen: String = "home"
 ) {
     NavigationBar(
@@ -228,7 +231,7 @@ fun BottomNavBar(
         )
         NavigationBarItem(
             selected = currentScreen == "perfil",
-            onClick = {},
+            onClick = onProfile,
             icon = { Icon(Icons.Filled.Person, contentDescription = "Perfil") },
             label = { Text("Perfil") },
             colors = NavigationBarItemDefaults.colors(
