@@ -41,6 +41,12 @@ class HabitViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    fun updateHabit(habit: HabitEntity, titulo: String, descricao: String, xp: Int) {
+        viewModelScope.launch {
+            repository.update(habit.copy(titulo = titulo, descricao = descricao, xp = xp))
+        }
+    }
+
     fun completeHabit(habit: HabitEntity) {
         viewModelScope.launch {
             android.util.Log.d("HabitViewModel", "complete: id=${habit.id} isDone=${isCompletedToday(habit.ultimaVezCompletado)}")

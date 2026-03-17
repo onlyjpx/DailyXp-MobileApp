@@ -29,7 +29,8 @@ fun AgendaScreen(
     viewModel: HabitViewModel,
     onAddHabit: () -> Unit = {},
     onHome: () -> Unit = {},
-    onStats: () -> Unit = {}
+    onStats: () -> Unit = {},
+    onEditHabit: (HabitEntity) -> Unit = {}
 ) {
     val habits by viewModel.allHabits.collectAsState()
 
@@ -224,6 +225,7 @@ fun AgendaScreen(
                             else viewModel.completeHabit(habit)
                         }
                     },
+                    onEdit = { onEditHabit(habit) },
                     onDelete = { viewModel.deleteHabit(habit) }
                 )
                 HorizontalDivider(color = Surface2, thickness = 1.dp)

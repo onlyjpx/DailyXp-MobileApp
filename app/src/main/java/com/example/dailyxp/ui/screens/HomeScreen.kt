@@ -18,13 +18,15 @@ import androidx.compose.ui.unit.sp
 import com.example.dailyxp.ui.components.HabitItem
 import com.example.dailyxp.ui.theme.*
 import com.example.dailyxp.viewmodel.HabitViewModel
+import com.example.dailyxp.data.local.HabitEntity
 
 @Composable
 fun HomeScreen(
     viewModel: HabitViewModel,
     onAddHabit: () -> Unit = {},
     onStats: () -> Unit = {},
-    onAgenda: () -> Unit = {}
+    onAgenda: () -> Unit = {},
+    onEditHabit: (HabitEntity) -> Unit = {}
 ) {
     val habits by viewModel.allHabits.collectAsState()
 
@@ -129,7 +131,7 @@ fun HomeScreen(
                 }
             }
 
-// oi joaoo, editar aquiii ->>
+// oi joaoo, já conectei o editar! ->>
             items(habits, key = { it.id }) { habit ->
                 val isDone = viewModel.isCompletedToday(habit.ultimaVezCompletado)
                 HabitItem(
@@ -145,7 +147,7 @@ fun HomeScreen(
                             viewModel.completeHabit(habit)
                         }
                     },
-                    onEdit = { /* por enquanto vazio, João Pedro vai conectar */ },
+                    onEdit = { onEditHabit(habit) },
                     onDelete = { viewModel.deleteHabit(habit) }
                 )
                 HorizontalDivider(color = Surface2, thickness = 1.dp)

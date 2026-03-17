@@ -9,6 +9,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -20,21 +21,33 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.dailyxp.data.local.HabitEntity
 import com.example.dailyxp.ui.theme.*
 import com.example.dailyxp.viewmodel.HabitViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateHabitScreen(
+fun HabitFormScreen(
+    habit: HabitEntity? = null,
     viewModel: HabitViewModel,
     onBack: () -> Unit = {}
 ) {
-    var habitName by remember { mutableStateOf("") }
-    var habitSubtitle by remember { mutableStateOf("") }
-    var xpValue by remember { mutableStateOf("10") }
+    val isEditing = habit != null
+
+    val existingTime = habit?.descricao?.substringBefore(" ·") ?: "07:00"
+    val timeParts = existingTime.split(":")
+    val initHour = timeParts.getOrNull(0)?.toIntOrNull() ?: 7
+    val initMinute = timeParts.getOrNull(1)?.toIntOrNull() ?: 0
+    val existingSubtitle = if (habit?.descricao?.contains(" · ") == true)
+        habit.descricao.substringAfter(" · ")
+    else ""
+
+    var habitName by remember { mutableStateOf(habit?.titulo ?: "") }
+    var habitSubtitle by remember { mutableStateOf(existingSubtitle) }
+    var xpValue by remember { mutableStateOf(habit?.xp?.toString() ?: "10") }
     var showTimePicker by remember { mutableStateOf(false) }
-    var selectedHour by remember { mutableStateOf(7) }
-    var selectedMinute by remember { mutableStateOf(0) }
+    var selectedHour by remember { mutableStateOf(initHour) }
+    var selectedMinute by remember { mutableStateOf(initMinute) }
     val timePickerState = rememberTimePickerState(
         initialHour = selectedHour,
         initialMinute = selectedMinute,
@@ -111,13 +124,13 @@ fun CreateHabitScreen(
                 }
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = "Novo Hábito",
+                        text = if (isEditing) "Editar Hábito" else "Novo Hábito",
                         fontSize = 18.sp,
                         fontWeight = FontWeight.Bold,
                         color = TextPrimary
                     )
                     Text(
-                        text = "Configure seu novo hábito",
+                        text = if (isEditing) "Ajuste os detalhes do hábito" else "Configure seu novo hábito",
                         fontSize = 12.sp,
                         color = TextMuted
                     )
@@ -130,7 +143,7 @@ fun CreateHabitScreen(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        Icons.Filled.Add,
+                        imageVector = if (isEditing) Icons.Filled.Edit else Icons.Filled.Add,
                         contentDescription = null,
                         tint = Teal,
                         modifier = Modifier.size(20.dp)
@@ -148,10 +161,7 @@ fun CreateHabitScreen(
             ) {
 
                 // Nome
-                InputCard(
-                    label = "✏️  NOME DO HÁBITO",
-                    trailingContent = null
-                ) {
+                InputCard(label = "✏️  NOME DO HÁBITO", trailingContent = null) {
                     TextField(
                         value = habitName,
                         onValueChange = { habitName = it },
@@ -185,12 +195,7 @@ fun CreateHabitScreen(
                     label = "⏰  HORÁRIO",
                     trailingContent = {
                         TextButton(onClick = { showTimePicker = true }) {
-                            Text(
-                                "Alterar",
-                                color = Teal,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Text("Alterar", color = Teal, fontSize = 12.sp, fontWeight = FontWeight.Bold)
                         }
                     }
                 ) {
@@ -208,13 +213,7 @@ fun CreateHabitScreen(
                     TextField(
                         value = habitSubtitle,
                         onValueChange = { habitSubtitle = it },
-                        placeholder = {
-                            Text(
-                                "Ex: Manhã · 5 min",
-                                color = TextDim,
-                                fontSize = 15.sp
-                            )
-                        },
+                        placeholder = { Text("Ex: Manhã · 5 min", color = TextDim, fontSize = 15.sp) },
                         modifier = Modifier.fillMaxWidth(),
                         textStyle = TextStyle(fontSize = 15.sp, color = TextPrimary),
                         singleLine = true,
@@ -239,12 +238,7 @@ fun CreateHabitScreen(
                                 .background(TealDim)
                                 .padding(horizontal = 10.dp, vertical = 4.dp)
                         ) {
-                            Text(
-                                text = "+$xpPreview xp",
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = Teal
-                            )
+                            Text("+$xpPreview xp", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = Teal)
                         }
                     }
                 ) {
@@ -252,12 +246,7 @@ fun CreateHabitScreen(
                         value = xpValue,
                         onValueChange = { xpValue = it },
                         placeholder = {
-                            Text(
-                                "10",
-                                color = TextDim,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.SemiBold
-                            )
+                            Text("10", color = TextDim, fontSize = 16.sp, fontWeight = FontWeight.SemiBold)
                         },
                         modifier = Modifier.fillMaxWidth(),
                         textStyle = TextStyle(
@@ -289,11 +278,20 @@ fun CreateHabitScreen(
                                 append(formattedTime)
                                 if (habitSubtitle.isNotBlank()) append(" · $habitSubtitle")
                             }
-                            viewModel.insertHabit(
-                                titulo = habitName,
-                                descricao = descricao,
-                                xp = xpValue.toIntOrNull() ?: 10
-                            )
+                            if (isEditing) {
+                                viewModel.updateHabit(
+                                    habit = habit!!,
+                                    titulo = habitName,
+                                    descricao = descricao,
+                                    xp = xpValue.toIntOrNull() ?: 10
+                                )
+                            } else {
+                                viewModel.insertHabit(
+                                    titulo = habitName,
+                                    descricao = descricao,
+                                    xp = xpValue.toIntOrNull() ?: 10
+                                )
+                            }
                             onBack()
                         }
                     },
@@ -304,7 +302,7 @@ fun CreateHabitScreen(
                     colors = ButtonDefaults.buttonColors(containerColor = Teal)
                 ) {
                     Text(
-                        text = "Salvar Hábito",
+                        text = if (isEditing) "Salvar Alterações" else "Salvar Hábito",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
                         color = BgDark
