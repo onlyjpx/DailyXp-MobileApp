@@ -1,10 +1,10 @@
+
 package com.example.dailyxp.ui.screens
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.KeyboardArrowLeft
@@ -50,6 +50,11 @@ fun AgendaScreen(
     }
     val firstDayOfWeek = (firstDayOfMonth.get(Calendar.DAY_OF_WEEK) + 5) % 7
     val daysInMonth = currentMonth.getActualMaximum(Calendar.DAY_OF_MONTH)
+
+    val today = Calendar.getInstance()
+    val isSelectedToday = selectedDay == today.get(Calendar.DAY_OF_MONTH) &&
+            selectedMonth == today.get(Calendar.MONTH) &&
+            selectedYear == today.get(Calendar.YEAR)
 
     Scaffold(
         containerColor = BgDark,
@@ -206,53 +211,21 @@ fun AgendaScreen(
 
             items(habits.size, key = { habits[it].id }) { index ->
                 val habit = habits[index]
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 10.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = habit.descricao?.substringBefore(" ·") ?: "",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = TextDim,
-                        modifier = Modifier.width(40.dp)
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(10.dp)
-                            .clip(androidx.compose.foundation.shape.CircleShape)
-                            .background(Teal)
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = habit.titulo,
-                            fontSize = 15.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = TextPrimary
-                        )
-                        Text(
-                            text = habit.descricao ?: "",
-                            fontSize = 11.sp,
-                            color = TextMuted
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .clip(androidx.compose.foundation.shape.RoundedCornerShape(8.dp))
-                            .background(TealDim)
-                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                    ) {
-                        Text(
-                            text = "+${habit.xp} xp",
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = Teal
-                        )
-                    }
-                }
+                val isDone = isSelectedToday && viewModel.isCompletedToday(habit.ultimaVezCompletado)
+                HabitItem(
+                    time = habit.descricao?.substringBefore(" ·") ?: "",
+                    name = habit.titulo,
+                    subtitle = habit.descricao ?: "",
+                    xp = habit.xp,
+                    isDone = isDone,
+                    onComplete = {
+                        if (isSelectedToday) {
+                            if (isDone) viewModel.uncompleteHabit(habit)
+                            else viewModel.completeHabit(habit)
+                        }
+                    },
+                    onDelete = { viewModel.deleteHabit(habit) }
+                )
                 HorizontalDivider(color = Surface2, thickness = 1.dp)
             }
 
